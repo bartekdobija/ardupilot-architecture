@@ -10,6 +10,7 @@ This repository documents how the ArduPilot firmware is organized, how data flow
 
 | # | Document | Description |
 |---|----------|-------------|
+| 0 | [Glossary](docs/00-glossary.md) | Acronyms and terms used throughout this analysis (HAL, IMU, SITL, DroneCAN, EKF3, …) |
 | 1 | [Architecture Overview](docs/01-architecture-overview.md) | High-level layering, module map, naming conventions, core design patterns |
 | 2 | [HAL & Platform Abstraction](docs/02-hal-and-platforms.md) | AP_HAL interfaces, ChibiOS/POSIX backends, the `hal` object, threading model |
 | 3 | [Boot & Startup](docs/03-boot-and-startup.md) | Power-on to ready: `main()`, `hal.run()`, `AP_Vehicle::setup()`, `init_ardupilot()` |
