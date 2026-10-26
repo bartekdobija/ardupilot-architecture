@@ -74,7 +74,7 @@ Backends register themselves via static `probe()`/detect functions; the frontend
 
 ## `AP_AHRS` — the Attitude/Position Hub
 
-`libraries/AP_AHRS/` is the vehicle-facing API over the estimators:
+[`libraries/AP_AHRS/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/libraries/AP_AHRS) is the vehicle-facing API over the estimators:
 
 - **Backends**: `AP_AHRS_NavEKF3` (the default — wraps EKF3), `AP_AHRS_NavEKF2`, `AP_AHRS_DCM` (legacy complementary/DCM fallback), `AP_AHRS_External`, `AP_AHRS_SIM`. Chosen by `AHRS_EKF_TYPE` (declared in `AP_AHRS`'s own var_info, default **3** = EKF3; 0 = DCM, 2 = EKF2).
 - `AP_AHRS::update()` runs the configured backend, blends/records results, and publishes: `roll/pitch/yaw`, quaternion, `get_relative_position_NED_origin()`/`_neu()`, velocity NED, origin, wind — plus reset-trackers that watch for attitude/position jumps (EKF lane switches) and warn.
@@ -84,9 +84,9 @@ Backends register themselves via static `probe()`/detect functions; the frontend
 
 ## EKF3 — the 24-State Filter
 
-`libraries/AP_NavEKF3/`: frontend `NavEKF3` + one `NavEKF3_core` **per IMU enabled in `EK3_IMU_MASK`** (default 3 = two lanes; all lanes run in parallel, allocated in fast RAM via `dal.malloc_type`, and a lane-selection score picks the primary — `EK3_PRIMARY` is forced while disarmed).
+[`libraries/AP_NavEKF3/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/libraries/AP_NavEKF3): frontend `NavEKF3` + one `NavEKF3_core` **per IMU enabled in `EK3_IMU_MASK`** (default 3 = two lanes; all lanes run in parallel, allocated in fast RAM via `dal.malloc_type`, and a lane-selection score picks the primary — `EK3_PRIMARY` is forced while disarmed).
 
-### State vector (`AP_NavEKF3_core.h:576`)
+### State vector ([`AP_NavEKF3_core.h:576`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/libraries/AP_NavEKF3/AP_NavEKF3_core.h#L576))
 
 | Indices | State | Meaning |
 |---|---|---|
@@ -99,9 +99,9 @@ Backends register themselves via static `probe()`/detect functions; the frontend
 | 19–21 | body magnetic field | mag model |
 | 22–23 | wind N/E | wind estimate |
 
-Covariance is a 24×24 `Matrix24`. Prediction math is **generated SymPy code** (Python scripts in `derivation/`, e.g. `code_gen.py`; the generated C++ is a build artifact, not checked in) — humans edit the derivation, not the C++.
+Covariance is a 24×24 `Matrix24`. Prediction math is **generated SymPy code** (Python scripts in [`derivation/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/libraries/AP_NavEKF3/derivation), e.g. [`code_gen.py`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/libraries/AP_NavEKF3/derivation/code_gen.py); the generated C++ is a build artifact, not checked in) — humans edit the derivation, not the C++.
 
-### Fusion cycle (`NavEKF3_core::UpdateFilter`, `AP_NavEKF3_core.cpp:645`)
+### Fusion cycle (`NavEKF3_core::UpdateFilter`, [`AP_NavEKF3_core.cpp:645`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/libraries/AP_NavEKF3/AP_NavEKF3_core.cpp#L645))
 
 ```mermaid
 flowchart TB
@@ -127,7 +127,7 @@ flowchart TB
 
 ### AP_DAL — deterministic replay
 
-`libraries/AP_DAL/` is a thin **Data Abstraction Layer**: EKF3 code reads *all* inputs via `dal.ins()`, `dal.gps()`, `dal.baro()`… In normal flight it's a passthrough. With `LOG_REPLAY=1`, every EKF input frame is logged (RFRH/RFRN/RGPH/RISH… messages); `Tools/Replay` then re-runs the **same** EKF code against the recorded frames with `-p` parameter overrides. This is why EKF3 code uses the unusual `dal.` style — it makes the safety-critical estimator **reproducible from any flight log**.
+[`libraries/AP_DAL/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/libraries/AP_DAL) is a thin **Data Abstraction Layer**: EKF3 code reads *all* inputs via `dal.ins()`, `dal.gps()`, `dal.baro()`… In normal flight it's a passthrough. With `LOG_REPLAY=1`, every EKF input frame is logged (RFRH/RFRN/RGPH/RISH… messages); [`Tools/Replay`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/Tools/Replay) then re-runs the **same** EKF code against the recorded frames with `-p` parameter overrides. This is why EKF3 code uses the unusual `dal.` style — it makes the safety-critical estimator **reproducible from any flight log**.
 
 ## GPS Details Worth Knowing
 

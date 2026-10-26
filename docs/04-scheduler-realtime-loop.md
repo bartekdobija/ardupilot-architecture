@@ -35,7 +35,7 @@ static const AP_Scheduler::Task scheduler_tasks[] = {
 };
 ```
 
-Fields (`AP_Scheduler.h:88`):
+Fields ([`AP_Scheduler.h:88`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/libraries/AP_Scheduler/AP_Scheduler.h#L88)):
 
 | Field | Meaning |
 |---|---|
@@ -47,7 +47,7 @@ Fields (`AP_Scheduler.h:88`):
 
 Two entry macros: `FAST_TASK`/`FAST_TASK_CLASS` (rate 0, priority `FAST_TASK_PRI0`, budget = one loop period) and `SCHED_TASK`/`SCHED_TASK_CLASS` for everything else.
 
-> **Precision:** `run()` gives *every-tick* treatment to **any task with priority ≤ 3** (`MAX_FAST_TASK_PRIORITIES`, `AP_Scheduler.cpp:231`) — not just 0–2. So `rc_loop`, table-listed at 250 Hz with priority 3, actually runs on every loop tick (400 Hz default); its `rate_hz` is ignored on the fast path.
+> **Precision:** `run()` gives *every-tick* treatment to **any task with priority ≤ 3** (`MAX_FAST_TASK_PRIORITIES`, [`AP_Scheduler.cpp:231`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/libraries/AP_Scheduler/AP_Scheduler.cpp#L231)) — not just 0–2. So `rc_loop`, table-listed at 250 Hz with priority 3, actually runs on every loop tick (400 Hz default); its `rate_hz` is ignored on the fast path.
 
 ### The real Copter fast chain (runs *every* tick, 400 Hz)
 
@@ -83,7 +83,7 @@ flowchart TB
     O --> P["return"]
 ```
 
-Key mechanics (`AP_Scheduler.cpp:191-346`):
+Key mechanics ([`AP_Scheduler.cpp:191-346`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/libraries/AP_Scheduler/AP_Scheduler.cpp#L191-L346)):
 
 - **Merging**: both tables are pre-sorted by priority; `run()` walks them like a merge sort, vehicle table winning ties.
 - **Rate = ticks**: a 50 Hz task with a 400 Hz loop runs every 8th tick (`interval = loop_rate / task_rate`). No timers, no interrupts — just `_tick_counter - _last_run[i]`.
@@ -98,7 +98,7 @@ Tasks named `one_hz_loop`, `three_hz_loop`, `ten_hz_logging_loop`… are just ta
 
 ## The Fast Rate Thread (Copter)
 
-For high-rate setups, Copter can additionally spawn a **rate thread** (`Copter::one_hz_loop` → `thread_create("rate", …, PRIORITY_RCOUT)`, `Copter.cpp:822`, gated by `AP_INERTIALSENSOR_FAST_SAMPLE_WINDOW_ENABLED` and the `FSTRATE_ENABLE` parameter) so the rate PIDs and motor output close at up to 8 kHz against `AP_InertialSensor`'s fast buffers, decoupled from the main loop's mode/attitude logic (`ArduCopter/rate_thread.cpp`). On most setups this is off and the fast task chain at loop rate is the whole story.
+For high-rate setups, Copter can additionally spawn a **rate thread** (`Copter::one_hz_loop` → `thread_create("rate", …, PRIORITY_RCOUT)`, [`Copter.cpp:822`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/ArduCopter/Copter.cpp#L822), gated by `AP_INERTIALSENSOR_FAST_SAMPLE_WINDOW_ENABLED` and the `FSTRATE_ENABLE` parameter) so the rate PIDs and motor output close at up to 8 kHz against `AP_InertialSensor`'s fast buffers, decoupled from the main loop's mode/attitude logic ([`ArduCopter/rate_thread.cpp`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/ArduCopter/rate_thread.cpp)). On most setups this is off and the fast task chain at loop rate is the whole story.
 
 ## Watchdogs — Three Layers
 

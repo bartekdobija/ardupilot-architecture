@@ -8,7 +8,7 @@ The `AP_HAL` family: abstract hardware interfaces, the global `hal` object, the 
 
 ## Why a HAL?
 
-ArduPilot runs on hundreds of boards: STM32F4/F7/H5/H7 (ChibiOS RTOS), Linux SBCs, ESP32, Qualcomm QURT, and as a native desktop process for simulation. `libraries/AP_HAL/` defines the **portable side** of every hardware touchpoint; each `AP_HAL_<Platform>/` implements it. Portable code (all `libraries/AP_*`, `AC_*` and vehicle code) includes *only* `AP_HAL` headers.
+ArduPilot runs on hundreds of boards: STM32F4/F7/H5/H7 (ChibiOS RTOS), Linux SBCs, ESP32, Qualcomm QURT, and as a native desktop process for simulation. [`libraries/AP_HAL/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/libraries/AP_HAL) defines the **portable side** of every hardware touchpoint; each `AP_HAL_<Platform>/` implements it. Portable code (all `libraries/AP_*`, `AC_*` and vehicle code) includes *only* `AP_HAL` headers.
 
 The platform is chosen **at build time**: your board's `hwdef.dat` sets `CONFIG_HAL_BOARD`, and the selected family's classes are compiled in and wired into a single global object.
 
@@ -60,25 +60,25 @@ classDiagram
     Callbacks <|-- AP_Vehicle
 ```
 
-- `libraries/AP_HAL/HAL.h` declares it; `get_HAL()` returns a const reference.
+- [`libraries/AP_HAL/HAL.h`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/libraries/AP_HAL/HAL.h) declares it; `get_HAL()` returns a const reference.
 - `HAL_ChibiOS` etc. only override `run()` (process entry); every driver member is a `ChibiOS::UARTDriver`, `ChibiOS::Scheduler`, … defined in the family's own namespace (`ChibiOS::`, `HALSITL::`, `Empty::`).
 - Empty slots are filled with `Empty::*` stubs — a board with no optical flow sensor still gets a working `hal.opticalflow` that does nothing. This "graceful degradation" lets one binary shape serve wildly different boards.
-- Vehicles never call a HAL constructor: the `AP_HAL_MAIN_CALLBACKS(&copter)` macro (`AP_HAL_Main.h`) defines `main()` → `hal.run(argc, argv, &copter)`, where `Copter` **is** the `HAL::Callbacks` (via `AP_Vehicle`).
+- Vehicles never call a HAL constructor: the `AP_HAL_MAIN_CALLBACKS(&copter)` macro ([`AP_HAL_Main.h`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/libraries/AP_HAL/AP_HAL_Main.h)) defines `main()` → `hal.run(argc, argv, &copter)`, where `Copter` **is** the `HAL::Callbacks` (via `AP_Vehicle`).
 
 ## The Interface Inventory
 
-Key abstract classes in `libraries/AP_HAL/` (namespaces `AP_HAL`):
+Key abstract classes in [`libraries/AP_HAL/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/libraries/AP_HAL) (namespaces `AP_HAL`):
 
 | Interface | File | What it abstracts |
 |---|---|---|
-| `UARTDriver` | `UARTDriver.h` | serial ports; `begin/write/read/flow_control` |
-| `GPIO` / `DigitalSource` | `GPIO.h` | pins, interrupts, USB detect |
-| `RCInput` / `RCOutput` | `RCInput.h`, `RCOutput.h` | receiver capture, PWM/DShot output |
-| `Scheduler` | `Scheduler.h` | `delay`, `delay_microseconds`, `register_timer_process/_io_process`, `thread_create`, priorities |
-| `Util` | `Util.h` | `snprintf`, hardware type, `PersistentData` (watchdog-RAM), safety switch, bootloader flash |
-| `AnalogIn` / `AnalogSource` | `AnalogIn.h` | ADC channels (battery, RSSI…) |
-| `Storage` | `Storage.h` | byte-block persistent storage |
-| `Semaphore` / `BinarySemaphore` | `Semaphores.h` | mutexes + `WITH_SEMAPHORE()` RAII helper |
+| `UARTDriver` | [`UARTDriver.h`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/libraries/AP_HAL/UARTDriver.h) | serial ports; `begin/write/read/flow_control` |
+| `GPIO` / `DigitalSource` | [`GPIO.h`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/libraries/AP_HAL/GPIO.h) | pins, interrupts, USB detect |
+| `RCInput` / `RCOutput` | [`RCInput.h`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/libraries/AP_HAL/RCInput.h), [`RCOutput.h`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/libraries/AP_HAL/RCOutput.h) | receiver capture, PWM/DShot output |
+| `Scheduler` | [`Scheduler.h`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/libraries/AP_HAL/Scheduler.h) | `delay`, `delay_microseconds`, `register_timer_process/_io_process`, `thread_create`, priorities |
+| `Util` | [`Util.h`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/libraries/AP_HAL/Util.h) | `snprintf`, hardware type, `PersistentData` (watchdog-RAM), safety switch, bootloader flash |
+| `AnalogIn` / `AnalogSource` | [`AnalogIn.h`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/libraries/AP_HAL/AnalogIn.h) | ADC channels (battery, RSSI…) |
+| `Storage` | [`Storage.h`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/libraries/AP_HAL/Storage.h) | byte-block persistent storage |
+| `Semaphore` / `BinarySemaphore` | [`Semaphores.h`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/libraries/AP_HAL/Semaphores.h) | mutexes + `WITH_SEMAPHORE()` RAII helper |
 | `Device`, `SPIDevice`, `I2CDevice`, `WSPIDevice` | `Device*.h` | bus devices with `register_periodic_callback` — the backbone of sensor drivers |
 | `CANIface`, `OpticalFlow`, `DSP`, `Flash`, `SIMState` | respective headers | CAN bus, flow sensors, FFT DSP helpers, flash, sim state injection |
 
@@ -110,11 +110,11 @@ flowchart LR
 
 ## ChibiOS Backend (the main one)
 
-`libraries/AP_HAL_ChibiOS/` is by far the most complete backend and the only RTOS one.
+[`libraries/AP_HAL_ChibiOS/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/libraries/AP_HAL_ChibiOS) is by far the most complete backend and the only RTOS one.
 
 ### Threads and priorities
 
-`ChibiOS::Scheduler::init()` (`Scheduler.cpp:101`) creates the static thread set. Priorities (higher number = runs first):
+`ChibiOS::Scheduler::init()` ([`Scheduler.cpp:101`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/libraries/AP_HAL_ChibiOS/Scheduler.cpp#L101)) creates the static thread set. Priorities (higher number = runs first):
 
 | Thread | Priority | Rate | Job |
 |---|---|---|---|
@@ -132,7 +132,7 @@ flowchart LR
 | startup | 10 | — | what `setup()` runs at, until boosted |
 | scripting | `LOWPRIO` | — | Lua VM thread ([11](11-scripting-interfaces-peripherals.md)) |
 
-Stacks are tiny: 512 (rcout) to 2048 (IO) bytes of working area per thread (`Scheduler.h:64-84`).
+Stacks are tiny: 512 (rcout) to 2048 (IO) bytes of working area per thread ([`Scheduler.h:64-84`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/libraries/AP_HAL_ChibiOS/Scheduler.h#L64-L84)).
 
 ```mermaid
 flowchart TB
@@ -178,28 +178,28 @@ SPIDEV ms5611 SPI4 DEVID1 MS5611_CS MODE3 20*MHZ 20*MHZ
 define HAL_BATT_VOLT_SCALE 18.0
 ```
 
-which `Tools/scripts/chibios_hwdef.py` compiles into a generated `hwdef.h`: pin muxing, `SERIALn` mapping, bus device registry (`SPIDEV`, `IIDEV`), ADC scaling, thread stack tweaks (`define APM_I2C_PRIORITY 181`). The IMU probe lists referenced by `AP_InertialSensor` come from here — board support means *adding a data file*, plus maybe a few `hwdef/common/` helpers.
+which [`libraries/AP_HAL_ChibiOS/hwdef/scripts/chibios_hwdef.py`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/libraries/AP_HAL_ChibiOS/hwdef/scripts/chibios_hwdef.py) compiles into a generated `hwdef.h`: pin muxing, `SERIALn` mapping, bus device registry (`SPIDEV`, `IIDEV`), ADC scaling, thread stack tweaks (`define APM_I2C_PRIORITY 181`). The IMU probe lists referenced by `AP_InertialSensor` come from here — board support means *adding a data file*, plus maybe a few [`hwdef/common/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/libraries/AP_HAL_ChibiOS/hwdef/common) helpers.
 
 ### Serial, RC in/out
 
 - **UART**: each UART gets its hardware config (DMA stream ids, inversion pins) from hwdef; a per-port TX thread waits on events; a shared RX thread polls at 1 kHz.
 - **RCInput**: pulses are captured by ICU/EICU (`SoftSigReader`) into a ring buffer; a 1 kHz `_timer_tick` hands them to `AP::RC()` — the **`AP_RCProtocol` library**, not the HAL, does protocol decoding (SBUS/DSM/CRSF/FPort…). The HAL is intentionally dumb here.
-- **RCOutput**: STM32 timer groups for PWM; DShot uses DMA bursts, bidirectional DShot for G4/H7; serial ESCs (`RCOutput_serial.cpp`) for blheli passthrough.
+- **RCOutput**: STM32 timer groups for PWM; DShot uses DMA bursts, bidirectional DShot for G4/H7; serial ESCs ([`RCOutput_serial.cpp`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/libraries/AP_HAL_ChibiOS/RCOutput_serial.cpp)) for blheli passthrough.
 
 ## SITL Backend (Software In The Loop)
 
-`libraries/AP_HAL_SITL/` + `libraries/SITL/` turn the vehicle into a **native desktop process with simulated physics**:
+[`libraries/AP_HAL_SITL/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/libraries/AP_HAL_SITL) + [`libraries/SITL/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/libraries/SITL) turn the vehicle into a **native desktop process with simulated physics**:
 
 - `HAL_SITL::run()` parses `--model`, `--home`, `--base-port`…, calls `callbacks->setup()`, then spins `callbacks->loop()` forever.
 - The **sensor simulation happens in-process**: sensor backends (`AP_InertialSensor_SITL`, `AP_Baro_SITL`, …) read `AP::sitl()->state`, which the physics model (`SITL::SIM_*`, 163 model source files — multicopter, plane, rover, submarine, JSBSim/Gazebo/AirSim bridges) fills each time slice. The same frontend/backend interfaces run unchanged — the sim is "just another driver".
 - Serial ports become TCP listeners (base port 5760+n) or UDP; a simulator or RC bridge feeds state via UDP (`SITL_State::_fdm_input_local()`).
 - Time is **virtual**: `Scheduler::delay_microseconds` → `SITL_State::wait_clock` advances simulated time; a watchdog is emulated with `SIGALRM` self-restart.
 
-This is why SITL builds of ArduPilot run the *actual vehicle code* — same `libraries/`, different HAL. See [12 · Build System & Testing](12-build-system-and-testing.md).
+This is why SITL builds of ArduPilot run the *actual vehicle code* — same [`libraries/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/libraries), different HAL. See [12 · Build System & Testing](12-build-system-and-testing.md).
 
 ## `AP_Vehicle` — where HAL meets vehicles
 
-`libraries/AP_Vehicle/AP_Vehicle.h:98`:
+[`libraries/AP_Vehicle/AP_Vehicle.h:98`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/libraries/AP_Vehicle/AP_Vehicle.h#L98):
 
 ```cpp
 class AP_Vehicle : public AP_HAL::HAL::Callbacks {

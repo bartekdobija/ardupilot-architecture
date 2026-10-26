@@ -6,9 +6,9 @@ How ~155 libraries become six vehicle firmwares and ~500 board targets: the waf 
 
 ---
 
-## The Build System — Python `waf`
+## The Build System — Python [`waf`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/waf)
 
-ArduPilot builds with a **customized waf** (`modules/waf` submodule, wrapped by the `waf` script) plus ArduPilot extensions in `Tools/ardupilotwaf/`. The old Makefile build is gone. The language standard is fixed by the build: C++ is compiled with **`-std=gnu++11`** and C with `-std=c11` (`Tools/ardupilotwaf/boards.py:437/1308`) — no C++14/17 anywhere in the tree.
+ArduPilot builds with a **customized waf** ([`modules/waf`](https://github.com/ArduPilot/waf/tree/35eadbb64e2052099a853b571e507c33032b392c) submodule, wrapped by the [`waf`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/waf) script) plus ArduPilot extensions in [`Tools/ardupilotwaf/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/Tools/ardupilotwaf). The old Makefile build is gone. The language standard is fixed by the build: C++ is compiled with **`-std=gnu++11`** and C with `-std=c11` ([`Tools/ardupilotwaf/boards.py:437/1308`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/Tools/ardupilotwaf/boards.py#L437)) — no C++14/17 anywhere in the tree.
 
 ```mermaid
 flowchart TB
@@ -28,9 +28,9 @@ flowchart TB
 
 ### Boards are data
 
-Every directory with an `hwdef.dat` under `libraries/AP_HAL_*/hwdef/` becomes a board at configure time: **460 ChibiOS** targets, 25 Linux, 10 SITL, 10 ESP32, 2 QURT (~507 total). A new board = a new data file (`Tools/scripts/chibios_hwdef.py` generates `hwdef.h` — pins, serial order, SPI devices, ADC scales, thread tweaks). `--board=sitl` (default) is just another entry.
+Every directory with an `hwdef.dat` under `libraries/AP_HAL_*/hwdef/` becomes a board at configure time: **460 ChibiOS** targets, 25 Linux, 10 SITL, 10 ESP32, 2 QURT (~507 total). A new board = a new data file ([`libraries/AP_HAL_ChibiOS/hwdef/scripts/chibios_hwdef.py`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/libraries/AP_HAL_ChibiOS/hwdef/scripts/chibios_hwdef.py) generates `hwdef.h` — pins, serial order, SPI devices, ADC scales, thread tweaks). `--board=sitl` (default) is just another entry.
 
-### The per-vehicle composition (`ArduCopter/wscript`)
+### The per-vehicle composition ([`ArduCopter/wscript`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/ArduCopter/wscript))
 
 ```python
 bld.ap_stlib(name='ArduCopter_libs',
@@ -45,20 +45,20 @@ bld.ap_program(program_name='arducopter',
 
 - `./waf copter` is a **group query**: "build every program tagged `copter`" (that's `arducopter`; `heli` similarly maps to `arducopter-heli`, same libs, different `FRAME_CONFIG`).
 - Libraries compiled in `ap_vehicle=ArduCopter` context carry vehicle defines (`AP_VEHICLE` macros, `MODE_*_ENABLED` sets) — the "specialize libraries per vehicle at compile time" mechanism from [01](01-architecture-overview.md).
-- `--enable/--disable` options (~437, generated from `Tools/scripts/build_options.py`) flip `AP_*_ENABLED` defines inside a per-board `ap_config.h` that is **force-included** into every translation unit. Core code must build with everything disabled.
-- Protocol stacks are **generated inside the build**: MAVLink C headers (`mavgen` from `all.xml`), DroneCAN/libcanard code (`dronecangen` from DSDL). No generated files are committed.
-- A generic `ap` static lib (`ap_vehicle='UNKNOWN'`, globbing all libraries) is what examples/tests link via `use='ap'` — the reason every `tests/wscript` looks the same.
+- `--enable/--disable` options (~437, generated from [`Tools/scripts/build_options.py`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/Tools/scripts/build_options.py)) flip `AP_*_ENABLED` defines inside a per-board `ap_config.h` that is **force-included** into every translation unit. Core code must build with everything disabled.
+- Protocol stacks are **generated inside the build**: MAVLink C headers (`mavgen` from [`all.xml`](https://github.com/ArduPilot/mavlink/blob/e03dad40efb3a4009ad6d78de5e55997139ac2f3/message_definitions/v1.0/all.xml)), DroneCAN/libcanard code (`dronecangen` from DSDL). No generated files are committed.
+- A generic `ap` static lib (`ap_vehicle='UNKNOWN'`, globbing all libraries) is what examples/tests link via `use='ap'` — the reason every `libraries/<lib>/tests/wscript` looks the same.
 
-Build outputs land in `build/<board>/bin/<program>`. `--upload` pushes over USB (or BlueOS). `--bootloader` switches the tree to building `Tools/AP_Bootloader`.
+Build outputs land in `build/<board>/bin/<program>`. `--upload` pushes over USB (or BlueOS). `--bootloader` switches the tree to building [`Tools/AP_Bootloader`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/Tools/AP_Bootloader).
 
 ## SITL — Software In The Loop
 
-`--board=sitl` produces a **native binary** with `AP_HAL_SITL` and physics from `libraries/SITL/` (163 `SIM_*.cpp` model files):
+`--board=sitl` produces a **native binary** with `AP_HAL_SITL` and physics from [`libraries/SITL/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/libraries/SITL) (163 `SIM_*.cpp` model files):
 
 - vehicle models: `SIM_Multirotor`, `SIM_Plane`/JSBSim bridge, `SIM_Rover`, `SIM_Submarine`, Gazebo/AirSim bridges, `SIM_Blimp`, `SIM_BalanceBot`, `SIM_Sailboat`…
 - sensor models: `SIM_GPS` (constellations, RTK), `SIM_Baro`, `SIM_Compass`, `SIM_Rangefinder`, `SIM_OptiFlow`, and *failure injection* (motor failures, gyro drift, wind, GPS glitches — the `SIM_*_ENABLE` params).
 
-`Tools/autotest/sim_vehicle.py` wraps configure/build/run (`-f quad`, `--console`, `--map`, gdb/valgrind/ASan switches) and starts MAVProxy. Default MAVLink endpoint: `tcp::5760`; simulator state via UDP. Because SITL runs the *real* vehicle code, it's the primary development and CI vehicle.
+[`Tools/autotest/sim_vehicle.py`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/Tools/autotest/sim_vehicle.py) wraps configure/build/run (`-f quad`, `--console`, `--map`, gdb/valgrind/ASan switches) and starts MAVProxy. Default MAVLink endpoint: `tcp::5760`; simulator state via UDP. Because SITL runs the *real* vehicle code, it's the primary development and CI vehicle.
 
 ## Testing
 
@@ -73,7 +73,7 @@ googletest-based, built and run with:
 
 27 test directories exist (`AP_Math`, `AP_Baro`, `AP_GPS`, `SITL`, `Filter`, `AP_Param`, `AP_RCProtocol`, …). Tests link the catch-all `ap` lib, so they exercise library code exactly as compiled for `UNKNOWN` vehicles — plus `SITL`-based tests run the sim.
 
-### Autotest — integration suite (`Tools/autotest/`)
+### Autotest — integration suite ([`Tools/autotest/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/Tools/autotest))
 
 Python + pymavlink + MAVProxy drives a full SITL vehicle through real missions and maneuvers:
 
@@ -81,17 +81,17 @@ Python + pymavlink + MAVProxy drives a full SITL vehicle through real missions a
 Tools/autotest/autotest.py build.Copter test.Copter.RTLYaw
 ```
 
-- suites per vehicle (`arducopter.py`, `arduplane.py`, `rover.py`, `ardusub.py`, …) — ~160 test classes: autoland, RTL, EKF failsafes, paratrooper… ; junit XML output
+- suites per vehicle ([`arducopter.py`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/Tools/autotest/arducopter.py), [`arduplane.py`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/Tools/autotest/arduplane.py), [`rover.py`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/Tools/autotest/rover.py), [`ardusub.py`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/Tools/autotest/ardusub.py), …) — ~160 test classes: autoland, RTL, EKF failsafes, paratrooper… ; junit XML output
 - vehicle variety: Sub, Copter, Plane, Tracker, Rover, QuadPlane, BalanceBot, Helicopter, Sailboat, Blimp
 - same harness runs the same tests against **real hardware** builds for HIL-style checks
 
 ### Replay
 
-`Tools/Replay` re-runs EKF3 deterministically from logs (see [10](10-parameters-storage-logging.md)) — used both as a test (regression diffs of estimator outputs, `check_replay_branch.py`) and as a tuning tool.
+[`Tools/Replay`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/Tools/Replay) re-runs EKF3 deterministically from logs (see [10](10-parameters-storage-logging.md)) — used both as a test (regression diffs of estimator outputs, [`check_replay_branch.py`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/Tools/Replay/check_replay_branch.py)) and as a tuning tool.
 
 ### Static & CI
 
-34 GitHub workflows compile the matrix: per-vehicle SITL tests (sharded), unit tests (gcc+clang × configs: unit-tests, examples, ASan), ChibiOS targets (`CubeOrange`, `fmuv3`, bootloaders, periph, IO firmware…), ESP32, QURT, Cygwin/macOS/Linux boards, `test_size.yml` (**binary size ratchet**), `test_scripting`, `test_dds` (ROS2), `test_renode` (HW-in-loop emulation), `test_clang_scan_build` (static analysis), plus style/pre-commit (`pre-commit`, copyright & `Subsystem:` commit-prefix conventions via `Tools/scripts/check_branch_conventions.py`).
+34 GitHub workflows compile the matrix: per-vehicle SITL tests (sharded), unit tests (gcc+clang × configs: unit-tests, examples, ASan), ChibiOS targets (`CubeOrange`, `fmuv3`, bootloaders, periph, IO firmware…), ESP32, QURT, Cygwin/macOS/Linux boards, [`test_size.yml`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/.github/workflows/test_size.yml) (**binary size ratchet**), [`test_scripting`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/.github/workflows/test_scripting.yml), [`test_dds`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/.github/workflows/test_dds.yml) (ROS2), [`test_renode`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/.github/workflows/test_renode.yml) (HW-in-loop emulation), [`test_clang_scan_build`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/.github/workflows/test_clang_scan_build.yml) (static analysis), plus style/pre-commit (`pre-commit`, copyright & `Subsystem:` commit-prefix conventions via [`Tools/scripts/check_branch_conventions.py`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/Tools/scripts/check_branch_conventions.py)).
 
 ## Developer Workflow Cheat Sheet
 

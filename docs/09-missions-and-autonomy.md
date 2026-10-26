@@ -8,7 +8,7 @@ The `AP_Mission` command engine and state machine, the dual nav/do command strea
 
 ## AP_Mission — the Command Engine
 
-`libraries/AP_Mission/` (`AP_Mission.h`, `AP_Mission.cpp` ~3,300 lines) is a **vehicle-agnostic interpreter** for a list of commands (a "mission") stored in persistent storage. It does not know how to fly — it knows how to *sequence*.
+[`libraries/AP_Mission/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/libraries/AP_Mission) ([`AP_Mission.h`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/libraries/AP_Mission/AP_Mission.h), [`AP_Mission.cpp`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/libraries/AP_Mission/AP_Mission.cpp) ~3,300 lines) is a **vehicle-agnostic interpreter** for a list of commands (a "mission") stored in persistent storage. It does not know how to fly — it knows how to *sequence*.
 
 ### Vehicle coupling — three functors
 
@@ -19,7 +19,7 @@ AP_Mission mission{
     FUNCTOR_BIND_MEMBER(&ModeAuto::exit_mission,   void)};
 ```
 
-`start_command` = begin action; `verify_command` = poll "done yet?"; `exit_mission` = mission over → each vehicle translates generic commands into its own nav stack. Plane's equivalent lives in `ArduPlane/commands_logic.cpp`, Rover's in `Rover/mode_auto.cpp`.
+`start_command` = begin action; `verify_command` = poll "done yet?"; `exit_mission` = mission over → each vehicle translates generic commands into its own nav stack. Plane's equivalent lives in [`ArduPlane/commands_logic.cpp`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/ArduPlane/commands_logic.cpp), Rover's in [`Rover/mode_auto.cpp`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/Rover/mode_auto.cpp).
 
 ### The `Mission_Command`
 
@@ -32,7 +32,7 @@ struct Mission_Command {
 };
 ```
 
-**Layout in storage** (`StorageManager::StorageMission`): a 4-byte version word (`AP_MISSION_EEPROM_VERSION` = `0x65AE`; a mismatch wipes the area — `check_eeprom_version`, `AP_Mission.cpp:2521`), then fixed-size **15-byte records** (`AP_MISSION_EEPROM_COMMAND_SIZE`). Max commands = `(area_size - 4) / 15` (`AP_Mission.cpp:82`); index **0 is always home**. If `BRD_SD_MISSION` is set, the mission overflows to an SD file (`APM/mission.stg`) transparently.
+**Layout in storage** (`StorageManager::StorageMission`): a 4-byte version word (`AP_MISSION_EEPROM_VERSION` = `0x65AE`; a mismatch wipes the area — `check_eeprom_version`, [`AP_Mission.cpp:2521`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/libraries/AP_Mission/AP_Mission.cpp#L2521)), then fixed-size **15-byte records** (`AP_MISSION_EEPROM_COMMAND_SIZE`). Max commands = `(area_size - 4) / 15` ([`AP_Mission.cpp:82`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/libraries/AP_Mission/AP_Mission.cpp#L82)); index **0 is always home**. If `BRD_SD_MISSION` is set, the mission overflows to an SD file (`APM/mission.stg`) transparently.
 
 ### The grammar (~70 MAV_CMDs)
 
@@ -42,7 +42,7 @@ struct Mission_Command {
 | **CONDITION_** | `DELAY`, `DISTANCE`, `YAW` — pause the *do*-stream until true |
 | **DO_** | `JUMP`, `JUMP_TAG`, `SET_HOME`, `CHANGE_SPEED`, `SET_SERVO/RELAY`, `REPEAT_SERVO/RELAY`, `DIGICAM_*`, `SET_CAM_TRIGG_DIST`, `SET_ROI[_LOCATION/_NONE/_WPNEXT_OFFSET]`, `MOUNT_CONTROL`, `PARACHUTE`, `GRIPPER`, `SPRAYER`, `ENGINE_CONTROL`, `VTOL_TRANSITION`, `INVERTED_FLIGHT`, `GO_AROUND`, `LAND_START`, `FENCE_ENABLE`, `AUX_FUNCTION`, `GIMBAL_MANAGER_*`, `SEND_SCRIPT_MESSAGE`, `WINCH`, `SET_RESUME_REPEAT_DIST`, `IMAGE_START/STOP_CAPTURE`, `SET_CAMERA_ZOOM/FOCUS/SOURCE`, `VIDEO_START/STOP_CAPTURE`, `DO_GUIDED_LIMITS`… |
 
-Most **DO_** commands are handled *generically* inside `AP_Mission_Commands.cpp` (gripper, servo events, camera, parachute, ROI…): they never reach vehicle code. Only nav commands and complex `DO_`s (speed, engine, VTOL…) fall through to the vehicle functors.
+Most **DO_** commands are handled *generically* inside [`AP_Mission_Commands.cpp`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/libraries/AP_Mission/AP_Mission_Commands.cpp) (gripper, servo events, camera, parachute, ROI…): they never reach vehicle code. Only nav commands and complex `DO_`s (speed, engine, VTOL…) fall through to the vehicle functors.
 
 ### The state machine — two concurrent streams
 
@@ -147,13 +147,13 @@ flowchart LR
 | `AP_Winch` | PWM/Daiha winch control via mission command |
 | `AP_ServoRelayEvents` | executes `DO_SET/REPEAT_SERVO/RELAY` — shared by AP_Mission |
 | `AP_Sprayer` | crop sprayer pump/spin (rover-class) |
-| `AP_Soaring` | **thermal hunting** (variometer + speed-to-fly) drives `ArduPlane/soaring.cpp` |
+| `AP_Soaring` | **thermal hunting** (variometer + speed-to-fly) drives [`ArduPlane/soaring.cpp`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/ArduPlane/soaring.cpp) |
 | `AP_WindVane` | wind direction sensors (analog/NMEA/RPM/airspeed) for sailboats |
 | `AP_Relay` | relay/servo outputs for arbitrary events |
 
 ## Storage Interplay
 
-All of these persist through `libraries/StorageManager/` areas — `StorageMission`, `StorageRally`, `StorageFence`, `StorageParam(+Bak)`, `StorageKeys`, `StorageBindInfo`, `StorageCANDNA` — one fixed-size, version-stamped layout shared across vehicles (details in [10](10-parameters-storage-logging.md)).
+All of these persist through [`libraries/StorageManager/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/libraries/StorageManager) areas — `StorageMission`, `StorageRally`, `StorageFence`, `StorageParam(+Bak)`, `StorageKeys`, `StorageBindInfo`, `StorageCANDNA` — one fixed-size, version-stamped layout shared across vehicles (details in [10](10-parameters-storage-logging.md)).
 
 ## Navigation
 

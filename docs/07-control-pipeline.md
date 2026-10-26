@@ -38,7 +38,7 @@ flowchart LR
 
 ### 1. `AC_AttitudeControl` — the attitude cascade
 
-`libraries/AC_AttitudeControl/` provides the base class + vehicle variants:
+[`libraries/AC_AttitudeControl/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/libraries/AC_AttitudeControl) provides the base class + vehicle variants:
 
 | Class | For | Rate PID flavor |
 |---|---|---|
@@ -59,7 +59,7 @@ Vertical: `set_throttle_out()` passes 0..1 throttle with motor headroom for atti
 
 ### 2. `AC_PosControl` — position cascade
 
-`AC_PosControl` (since this master-era tree lives in `AC_AttitudeControl/`) splits cleanly:
+`AC_PosControl` (since this master-era tree lives in [`AC_AttitudeControl/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/libraries/AC_AttitudeControl)) splits cleanly:
 
 - **Input shaping** (jerk-limited kinematic targets): `input_pos_NED_m`, `input_vel_accel_*`, `D_set_pos_target_from_climb_rate_ms` — *what we want the vehicle to track*, generated smooth.
 - **Correction** (the PID cascade): position error → `AC_P_2D` (velocity correction, sqrt-controller) → velocity error → `AC_PID_2D` → acceleration → `accel_NE_mss_to_lean_angles_rad()` → **lean angles**, handed to `AC_AttitudeControl::input_thrust_vector_heading*`. Vertical: `AC_P_1D` → `AC_PID_Basic` (velocity) → `AC_PID` (accel → throttle).
@@ -78,7 +78,7 @@ Not a PID — a **trajectory generator** feeding `AC_PosControl`:
 
 ### 4. `AP_Motors` — the mixers
 
-`libraries/AP_Motors/`:
+[`libraries/AP_Motors/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/libraries/AP_Motors):
 
 ```mermaid
 classDiagram
@@ -142,11 +142,11 @@ This is the **universal join point**: whichever vehicle, whichever controller, o
 
 ### RC input side
 
-`libraries/RC_Channel/`: each `RC_Channel` owns `RCx_MIN/MAX/TRIM`, `RCx_DZ` deadzone, `RCx_REVERSED`, and `RCx_OPTION` (aux switch function — **~180 `AUX_FUNC` options**: mode switches, RTL, arm/disarm, camera trigger, winch, …). `RC_Channels::read_aux_all()` (a 10 Hz scheduler task) polls option switches; `read_mode_switch()` reads the flight-mode channel. Input flows: `AP_RCProtocol` (see [08](08-gcs-and-communications.md)) decodes frames into the HAL `RCInput`, and `RC_Channels::read_input()` pulls channel PWM from `hal.rcin` each pass.
+[`libraries/RC_Channel/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/libraries/RC_Channel): each `RC_Channel` owns `RCx_MIN/MAX/TRIM`, `RCx_DZ` deadzone, `RCx_REVERSED`, and `RCx_OPTION` (aux switch function — **~180 `AUX_FUNC` options**: mode switches, RTL, arm/disarm, camera trigger, winch, …). `RC_Channels::read_aux_all()` (a 10 Hz scheduler task) polls option switches; `read_mode_switch()` reads the flight-mode channel. Input flows: `AP_RCProtocol` (see [08](08-gcs-and-communications.md)) decodes frames into the HAL `RCInput`, and `RC_Channels::read_input()` pulls channel PWM from `hal.rcin` each pass.
 
 ## Fixed-Wing Chain (Plane / QuadPlane hover)
 
-Plane replaces the vector cascade with two **scalar** controllers plus its own attitude PIDs (`libraries/APM_Control/`: `AP_RollController`/`AP_PitchController` derive from the new `AP_FW_Controller` base, alongside `AP_YawController` and `AP_SteerController`):
+Plane replaces the vector cascade with two **scalar** controllers plus its own attitude PIDs ([`libraries/APM_Control/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/libraries/APM_Control): `AP_RollController`/`AP_PitchController` derive from the new `AP_FW_Controller` base, alongside `AP_YawController` and `AP_SteerController`):
 
 ```mermaid
 flowchart LR

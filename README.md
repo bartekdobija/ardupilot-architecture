@@ -4,7 +4,7 @@
 
 This repository documents how the ArduPilot firmware is organized, how data flows through it, and where to change what. The goal is to give programmers and contributors an accurate mental model of the codebase.
 
-**All paths in this analysis are relative to [`ardupilot/`](../ardupilot) and reference the source tree at commit `e96bd9053e` (tag `ArduPilot-4.6.0-beta1`, firmware version `4.8.0-dev`, master-era code).**
+**All paths in this analysis are relative to [`ardupilot/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e) and reference the source tree at commit `e96bd9053e` (firmware version `4.8.0-dev`, master-era code) — every source-file reference links into that pinned tree.**
 
 ## Table of Contents
 
@@ -31,20 +31,20 @@ This repository documents how the ArduPilot firmware is organized, how data flow
 - **Parallelism**: one flight thread (`loop()`) plus fixed HAL-owned threads (timer, IO, monitor, RC in/out) — vehicles are **cooperatively scheduled**, never preempted by other ArduPilot code
 - **Estimation**: EKF3 (24-state, one lane per enabled IMU), legacy EKF2, DCM fallback
 - **Build**: Python `waf` (with ArduPilot-specific extensions), board definitions as data files (`hwdef.dat`), protocol code generated inside the build (MAVLink, DroneCAN)
-- **Tests**: googletest unit tests (27 `libraries/*/tests` dirs), Python-driven SITL integration suites (`autotest`, ~160 test classes), plus `Tools/Replay` for deterministic log replay of the EKF
+- **Tests**: googletest unit tests (27 `libraries/*/tests` dirs), Python-driven SITL integration suites (`autotest`, ~160 test classes), plus [`Tools/Replay`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/Tools/Replay) for deterministic log replay of the EKF
 
 ## Source Stats
 
-- `libraries/`: **155 library directories**, ~2,850 C++ source files (incl. examples), **~729,000 lines** of code
+- [`libraries/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/libraries): **155 library directories**, ~2,850 C++ source files (incl. examples), **~729,000 lines** of code
 - Vehicle programs: ArduCopter **92 files** (~30k lines), ArduPlane **86** (~32k), Rover **52** (~11k), ArduSub **50** (~12k), Blimp **39** (~7k), AntennaTracker **27** (~3.5k)
 - One codebase compiles **six different vehicles** (plus the heli build) into **~500 board targets**: **460 ChibiOS** hwdefs, 25 Linux, 10 SITL, 10 ESP32, 2 QURT
-- ~437 build `--enable/--disable` feature options generated from a single table (`Tools/scripts/build_options.py`)
-- **161** Lua example scripts in `libraries/AP_Scripting/examples/`
+- ~437 build `--enable/--disable` feature options generated from a single table ([`Tools/scripts/build_options.py`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/Tools/scripts/build_options.py))
+- **161** Lua example scripts in [`libraries/AP_Scripting/examples/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/libraries/AP_Scripting/examples)
 - A typical ArduCopter build exposes **on the order of 1,000–1,300 parameters** to a ground station
 
 ## The System at a Glance
 
-ArduPilot is a **library-centric autopilot**: almost all logic lives in vehicle-agnostic libraries under `libraries/`, and each vehicle directory (`ArduCopter/`, `ArduPlane/`, …) is a thin composition layer that wires those libraries together and adds vehicle-specific mode logic. Everything runs on a **cooperative scheduler** paced by IMU samples, on top of a hardware abstraction layer (HAL) that hides the RTOS and board differences.
+ArduPilot is a **library-centric autopilot**: almost all logic lives in vehicle-agnostic libraries under [`libraries/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/libraries), and each vehicle directory ([`ArduCopter/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/ArduCopter), [`ArduPlane/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/ArduPlane), …) is a thin composition layer that wires those libraries together and adds vehicle-specific mode logic. Everything runs on a **cooperative scheduler** paced by IMU samples, on top of a hardware abstraction layer (HAL) that hides the RTOS and board differences.
 
 ```mermaid
 flowchart LR
@@ -145,6 +145,16 @@ ardupilot/
 ├── tests/                # shared test helpers (gtest / pytest)
 └── docs/                  # Doxygen generation config only
 ```
+
+## Contributing
+
+Help is welcome! If you find this analysis useful, spotted an error, or want to clarify a section — patches and improvements are appreciated:
+
+- **Typos, broken links, stale line references**: open an issue or just send a PR against this repo.
+- **Factual corrections**: this analysis pins a specific tree (`e96bd9053e`, firmware `4.8.0-dev`); if the upstream code has moved, PRs that re-verify and update claims (with `file:line` evidence) are especially valuable.
+- **New content**: missing subsystems (e.g. `AP_BattMonitor`, `AP_WindVane`, `AP_DDS`/ROS 2) or better diagrams? Contributions welcome — keep the style: simple English, `file:line` references, Mermaid diagrams.
+
+The `docs/` pages are plain Markdown — edit and PR. For anything larger, please open an issue first to discuss the approach.
 
 ## License
 

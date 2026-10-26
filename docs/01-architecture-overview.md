@@ -8,18 +8,18 @@ High-level system architecture, module map, layering and the design patterns tha
 
 ## What ArduPilot Is
 
-ArduPilot is a family of autopilot programs ("firmware") built from **one shared library collection**. The same `libraries/` tree powers:
+ArduPilot is a family of autopilot programs ("firmware") built from **one shared library collection**. The same [`libraries/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/libraries) tree powers:
 
 | Program | Binary name | Vehicle | Default loop rate |
 |---|---|---|---|
-| `ArduCopter/` | `arducopter` (and `arducopter-heli`) | multicopters + helicopters | 400 Hz |
-| `ArduPlane/` | `arduplane` | fixed-wing, VTOL quadplanes | 50 Hz |
-| `Rover/` | `ardurover` | ground rovers, sailboats | 50 Hz |
-| `ArduSub/` | `ardusub` | underwater ROVs | 400 Hz |
-| `AntennaTracker/` | `antennatracker` | pan/tilt antenna trackers | 50 Hz |
-| `Blimp/` | `blimp` | indoor buoyant airships | 50 Hz |
+| [`ArduCopter/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/ArduCopter) | `arducopter` (and `arducopter-heli`) | multicopters + helicopters | 400 Hz |
+| [`ArduPlane/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/ArduPlane) | `arduplane` | fixed-wing, VTOL quadplanes | 50 Hz |
+| [`Rover/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/Rover) | `ardurover` | ground rovers, sailboats | 50 Hz |
+| [`ArduSub/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/ArduSub) | `ardusub` | underwater ROVs | 400 Hz |
+| [`AntennaTracker/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/AntennaTracker) | `antennatracker` | pan/tilt antenna trackers | 50 Hz |
+| [`Blimp/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/Blimp) | `blimp` | indoor buoyant airships | 50 Hz |
 
-Each is a thin application layer over the same sensors, estimation, control, communication and mission libraries. A typical vehicle directory contains only modes, arming checks, GCS overrides and parameter declarations — the "hard" logic is in `libraries/`.
+Each is a thin application layer over the same sensors, estimation, control, communication and mission libraries. A typical vehicle directory contains only modes, arming checks, GCS overrides and parameter declarations — the "hard" logic is in [`libraries/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/libraries).
 
 ## The Four Layers
 
@@ -81,9 +81,9 @@ The first letters of a library name tell you what it is — this is a strong, pr
 | `APM_` | fixed-wing control (plane) | `APM_Control` (roll/pitch/yaw/steer controllers) |
 | `GCS_` | ground-control stack | `GCS_MAVLink` |
 | `AP_HAL*` | hardware abstraction family | `AP_HAL_ChibiOS` |
-| `SITL` | simulator | `SITL/SIM_Aircraft` |
+| `SITL` | simulator | [`SITL/SIM_Aircraft`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/libraries/SITL/SIM_Aircraft.cpp) |
 
-The parameter namespaces follow the same logic: `ATC_*` (attitude control), `PSC_*` (position control), `WP_*` (waypoint nav), `MOT_*` (motors), `EK3_*` (EKF3), `SRx_*` (MAVLink stream rates), … Prefixes are assigned in each vehicle's `Parameters.cpp`, not inside the libraries — a library declares *relative* names (e.g. `_RLL` "roll") and the vehicle prefixes them (`ATC_ANG_RLL_P`).
+The parameter namespaces follow the same logic: `ATC_*` (attitude control), `PSC_*` (position control), `WP_*` (waypoint nav), `MOT_*` (motors), `EK3_*` (EKF3), `SRx_*` (MAVLink stream rates), … Prefixes are assigned in each vehicle's [`Parameters.cpp`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/ArduCopter/Parameters.cpp), not inside the libraries — a library declares *relative* names (e.g. `_RLL` "roll") and the vehicle prefixes them (`ATC_ANG_RLL_P`).
 
 ## The Core Design Patterns
 
@@ -131,7 +131,7 @@ Libraries contain all generic logic and call back into vehicles through **functo
 
 ### 3. Composition + `friend`
 
-Vehicle classes own their library objects as *members* and grant GCS/arming/mode classes access via C++ `friend` declarations rather than getter explosion (`Copter.h` friends the entire GCS, arming and mode stack). Unusual, deliberately pragmatic.
+Vehicle classes own their library objects as *members* and grant GCS/arming/mode classes access via C++ `friend` declarations rather than getter explosion ([`Copter.h`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/ArduCopter/Copter.h) friends the entire GCS, arming and mode stack). Unusual, deliberately pragmatic.
 
 ### 4. Parameters as data (`var_info` tables)
 

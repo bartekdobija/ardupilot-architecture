@@ -8,7 +8,7 @@ How the six vehicle programs are built: the `AP_Vehicle` base class, the `Copter
 
 ## Shared Base: `AP_Vehicle`
 
-Every vehicle class inherits `libraries/AP_Vehicle/AP_Vehicle.h:98`:
+Every vehicle class inherits [`libraries/AP_Vehicle/AP_Vehicle.h:98`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/libraries/AP_Vehicle/AP_Vehicle.h#L98):
 
 ```mermaid
 classDiagram
@@ -82,14 +82,14 @@ classDiagram
 
 > **Why "final" setup/loop?** So every vehicle shares one boot and one loop skeleton — a contributor learning `ArduCopter`'s boot already knows `Rover`'s. Vehicle code plugs into `init_ardupilot()` and the task table instead.
 
-## Case Study: `Copter` (`ArduCopter/`)
+## Case Study: `Copter` ([`ArduCopter/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/ArduCopter))
 
-74 `.cpp` + 18 `.h` files (~30k lines). `Copter.h` declares the object graph:
+74 `.cpp` + 18 `.h` files (~30k lines). [`Copter.h`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/ArduCopter/Copter.h) declares the object graph:
 
 - **Parameters**: `g` (`Parameters`) + `g2` (`ParametersG2`) — two var_info blocks because one vehicle can exceed 256 top-level parameter keys.
 - **RC**: four `RC_Channel*` (`channel_roll/pitch/throttle/yaw`), `RCMapper rcmap`.
 - **Estimation**: `AP_AHRS ahrs` (from `AP_Vehicle`), optional `AP_AHRS_View *ahrs_view` (rotated view for exotic frames).
-- **Arming**: `AP_Arming_Copter arming` — subclass of the generic `AP_Arming` (`libraries/AP_Arming`) with copter-specific checks.
+- **Arming**: `AP_Arming_Copter arming` — subclass of the generic `AP_Arming` ([`libraries/AP_Arming`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/libraries/AP_Arming)) with copter-specific checks.
 - **Motors & controllers**: `MOTOR_CLASS *motors` — a compile-time macro selecting `AP_MotorsMulticopter` vs `AP_MotorsHeli` via `FRAME_CONFIG`; heap-allocated in `allocate_motors()` along with `AC_AttitudeControl *attitude_control`, `AC_PosControl`, `AC_WPNav`, `AC_Loiter`, `AC_Circle` (see [07](07-control-pipeline.md)).
 - **Modes**: `Mode *flightmode` pointer + one member object per mode (`ModeStabilize stabilize; ModeAcro acro; …`), `ModeGuidedCustom *mode_guided_custom[5]`.
 - **GCS**: `GCS_Copter _gcs`.
@@ -102,15 +102,15 @@ The entire class declares its GCS, arming, parameters and mode classes as `frien
 
 | Files | Contents |
 |---|---|
-| `Copter.cpp`, `system.cpp` | setup glue, scheduler table, `init_ardupilot`, 1 Hz housekeeping |
+| [`Copter.cpp`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/ArduCopter/Copter.cpp), [`system.cpp`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/ArduCopter/system.cpp) | setup glue, scheduler table, `init_ardupilot`, 1 Hz housekeeping |
 | `mode*.cpp` (~30) | one file per flight mode |
-| `Attitude.cpp` | attitude control calls from modes |
-| `motors.cpp` | mixer setup, safety, interlock |
-| `AP_State.cpp` | arm/disarm state, simple mode |
-| `AP_Arming_Copter.cpp` | pre-arm/arm check suites |
-| `events.cpp`, `failsafe.cpp` | failsafe event dispatch |
-| `crash_check.cpp`, `land_detector.cpp` | crash detection; landed detection |
-| `Log.cpp`, `GCS_*.cpp` | logging and GCS subclass |
+| [`Attitude.cpp`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/ArduCopter/Attitude.cpp) | attitude control calls from modes |
+| [`motors.cpp`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/ArduCopter/motors.cpp) | mixer setup, safety, interlock |
+| [`AP_State.cpp`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/ArduCopter/AP_State.cpp) | arm/disarm state, simple mode |
+| [`AP_Arming_Copter.cpp`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/ArduCopter/AP_Arming_Copter.cpp) | pre-arm/arm check suites |
+| [`events.cpp`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/ArduCopter/events.cpp), [`failsafe.cpp`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/ArduCopter/failsafe.cpp) | failsafe event dispatch |
+| [`crash_check.cpp`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/ArduCopter/crash_check.cpp), [`land_detector.cpp`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/ArduCopter/land_detector.cpp) | crash detection; landed detection |
+| [`Log.cpp`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/ArduCopter/Log.cpp), `GCS_*.cpp` | logging and GCS subclass |
 
 ## The Mode System
 
@@ -157,9 +157,9 @@ classDiagram
     Mode <|-- ModeZigZag
 ```
 
-ArduCopter's `Mode::Number` enum (`mode.h:77-109`) defines **26 values** — STABILIZE, ACRO, ALT_HOLD, AUTO, GUIDED, LOITER, RTL, CIRCLE, LAND, DRIFT, SPORT, FLIP, AUTOTUNE, POSHOLD, BRAKE, THROW, AVOID_ADSB, GUIDED_NOGPS, SMART_RTL, FLOWHOLD, FOLLOW, ZIGZAG, SYSTEMID, AUTOROTATE, AUTO_RTL, TURTLE — with gaps (8, 10, 12 unused; 30 reserved for "offboard"). AUTO_RTL is a pseudo-mode: AUTO + jump to `DO_LAND_START`.
+ArduCopter's `Mode::Number` enum ([`mode.h:77-109`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/ArduCopter/mode.h#L77-L109)) defines **26 values** — STABILIZE, ACRO, ALT_HOLD, AUTO, GUIDED, LOITER, RTL, CIRCLE, LAND, DRIFT, SPORT, FLIP, AUTOTUNE, POSHOLD, BRAKE, THROW, AVOID_ADSB, GUIDED_NOGPS, SMART_RTL, FLOWHOLD, FOLLOW, ZIGZAG, SYSTEMID, AUTOROTATE, AUTO_RTL, TURTLE — with gaps (8, 10, 12 unused; 30 reserved for "offboard"). AUTO_RTL is a pseudo-mode: AUTO + jump to `DO_LAND_START`.
 
-**Dispatch path** (`mode.cpp:318`):
+**Dispatch path** ([`mode.cpp:318`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/ArduCopter/mode.cpp#L318)):
 
 ```mermaid
 flowchart LR
@@ -172,23 +172,23 @@ flowchart LR
     E --> F["logger.Write_Mode<br/>control_mode_reason = reason"]
 ```
 
-`ModeReason` (`libraries/AP_Vehicle/ModeReason.h:19-75`, **56 values**) — RC_COMMAND, GCS_COMMAND, RADIO/BATTERY/GCS/EKF/TERRAIN_FAILSAFE, GPS_GLITCH, FENCE_BREACHED, SCRIPTING… — rides along with every mode change, so logs can answer *"why was the vehicle in RTL?"*.
+`ModeReason` ([`libraries/AP_Vehicle/ModeReason.h:19-75`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/libraries/AP_Vehicle/ModeReason.h#L19-L75), **56 values**) — RC_COMMAND, GCS_COMMAND, RADIO/BATTERY/GCS/EKF/TERRAIN_FAILSAFE, GPS_GLITCH, FENCE_BREACHED, SCRIPTING… — rides along with every mode change, so logs can answer *"why was the vehicle in RTL?"*.
 
 Every fast tick, `update_flight_mode` → `flightmode->run()`. A mode's `run()` reads pilot sticks (or autopilot targets) and commands the controllers — Stabilize feeds pilot angles into `attitude_control`, Loiter feeds position targets into `wp_nav`/`pos_control`, Auto drives `wp_nav` from `AP_Mission` (see [09](09-missions-and-autonomy.md)). The chain into motors is always the same: **mode → `AC_AttitudeControl` input setter → `input_thrust_vector`/`set_throttle_out` → `AP_Motors`** ([07](07-control-pipeline.md)).
 
 ## Arming
 
-Generic `libraries/AP_Arming` + vehicle subclasses. `AP_Arming_Copter` (`ArduCopter/AP_Arming_Copter.h`) organizes checks into named suites — `ins_checks`, `gps_checks`, `barometer_checks`, `board_voltage_checks`, `parameter_checks`, `oa_checks`, `mandatory_position_checks`, `gcs_failsafe_check`, `rc_throttle_failsafe_checks`, … The suites are composable: pre-arm runs most of them, arm runs the mandatory subset, and a `REQUIRE` bitmask parameter chooses which are *blocking*. This is how one mechanism serves both "text wall on pre-arm" and "hard safety gate on arming".
+Generic [`libraries/AP_Arming`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/libraries/AP_Arming) + vehicle subclasses. `AP_Arming_Copter` ([`ArduCopter/AP_Arming_Copter.h`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/ArduCopter/AP_Arming_Copter.h)) organizes checks into named suites — `ins_checks`, `gps_checks`, `barometer_checks`, `board_voltage_checks`, `parameter_checks`, `oa_checks`, `mandatory_position_checks`, `gcs_failsafe_check`, `rc_throttle_failsafe_checks`, … The suites are composable: pre-arm runs most of them, arm runs the mandatory subset, and a `REQUIRE` bitmask parameter chooses which are *blocking*. This is how one mechanism serves both "text wall on pre-arm" and "hard safety gate on arming".
 
 ## Failsafes
 
-Copter keeps a bitfield of active failsafes (`radio`, `gcs`, `ekf`, `terrain`, `adsb`, `deadreckon`) plus battery, and a **priority table** (`_failsafe_priorities[]`, `Copter.h:640`: TERMINATE > LAND > RTL > SMARTRTL_LAND > SMARTRTL > NONE by default): when several triggers fire at once, the *highest-priority* action wins — actions are `FailsafeAction { NONE, LAND, RTL, SMARTRTL, SMARTRTL_LAND, TERMINATE, AUTO_DO_LAND_START, BRAKE_LAND }` (`Copter.h:598`). Failsafe *detection* lives in scheduled checks; failsafe *reaction* in `do_failsafe_action` (`events.cpp:485`), which funnels into `set_mode` with a `*_FAILSAFE` ModeReason. Crash detection (`crash_check.cpp`) is separate: attitude beyond limits + thrust loss ⇒ disarm.
+Copter keeps a bitfield of active failsafes (`radio`, `gcs`, `ekf`, `terrain`, `adsb`, `deadreckon`) plus battery, and a **priority table** (`_failsafe_priorities[]`, [`Copter.h:640`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/ArduCopter/Copter.h#L640): TERMINATE > LAND > RTL > SMARTRTL_LAND > SMARTRTL > NONE by default): when several triggers fire at once, the *highest-priority* action wins — actions are `FailsafeAction { NONE, LAND, RTL, SMARTRTL, SMARTRTL_LAND, TERMINATE, AUTO_DO_LAND_START, BRAKE_LAND }` ([`Copter.h:598`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/ArduCopter/Copter.h#L598)). Failsafe *detection* lives in scheduled checks; failsafe *reaction* in `do_failsafe_action` ([`events.cpp:485`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/ArduCopter/events.cpp#L485)), which funnels into `set_mode` with a `*_FAILSAFE` ModeReason. Crash detection ([`crash_check.cpp`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/ArduCopter/crash_check.cpp)) is separate: attitude beyond limits + thrust loss ⇒ disarm.
 
-`land_detector.cpp` decides `land_complete` (throttle low + attitude low + motion low + rangefinder agrees) — the flag that permits auto-disarm and drives landing lights/GCS state.
+[`land_detector.cpp`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/ArduCopter/land_detector.cpp) decides `land_complete` (throttle low + attitude low + motion low + rangefinder agrees) — the flag that permits auto-disarm and drives landing lights/GCS state.
 
 ## The Other Vehicles
 
-### ArduPlane (`ArduPlane/`)
+### ArduPlane ([`ArduPlane/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/ArduPlane))
 
 Fixed-wing + **QuadPlane VTOL**. Key differences from Copter:
 
@@ -197,19 +197,19 @@ Fixed-wing + **QuadPlane VTOL**. Key differences from Copter:
 - Mode classes mirror copter's (`ModeAuto`, `ModeLoiter`, `ModeFBWA`, …) plus Q-modes (`ModeQStabilize`, `ModeQLoiter`, `ModeQLand`, `ModeQRTL`, …).
 - Plane-only libs: `AP_Landing` (autoland glide slopes, deepstall, aborts), `AP_Soaring` (thermal hunting), `AP_AdvancedFailsafe_Plane`, `APM_Control` (roll/pitch/yaw/steer PIDs).
 
-### Rover (`Rover/`) — rovers and sailboats
+### Rover ([`Rover/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/Rover)) — rovers and sailboats
 
 No attitude/altitude — the controlled quantities are **heading and ground speed**: `AR_WPNav` (waypoint navigation with SCurve cornering and pivot turns), `AR_AttitudeControl` (steering PID), `AR_PosControl` (speed→throttle), `AP_MotorsUGV` (steering + throttle SRV functions; skid steering; sail servos for `Sailboat`). Modes: Manual, Hold, Acro, Steering, Loiter, Guided, Auto, RTL, SmartRTL, Follow, Dock… plus `AP_WindVane` for sailboats.
 
-### ArduSub (`ArduSub/`)
+### ArduSub ([`ArduSub/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/ArduSub))
 
 Underwater ROV: **6-DoF vectored motors** (`AP_Motors6DOF`), "attitude" without gravity-altitude, **depth** from rangefinder/water-pressure as the vertical reference, `AP_LeakDetector`, lights and grippers as SRV functions, surface mode. 11 modes (Stabilize, Acro, AltHold, PosHold, Guided, Circle, Auto, Manual, Surface, SurfTrak, MotorDetect).
 
-### AntennaTracker (`AntennaTracker/`)
+### AntennaTracker ([`AntennaTracker/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/AntennaTracker))
 
-Not a flight vehicle: it **points** pan/tilt servos at another vehicle using its position — `SRV_Channels servo_channels` + tracking geometry (`tracking.cpp`), no attitude control stack. Modes: Manual, Stop, Scan, ServoTest, Auto, Guided, Initialising.
+Not a flight vehicle: it **points** pan/tilt servos at another vehicle using its position — `SRV_Channels servo_channels` + tracking geometry ([`tracking.cpp`](https://github.com/ArduPilot/ardupilot/blob/e96bd9053e/AntennaTracker/tracking.cpp)), no attitude control stack. Modes: Manual, Stop, Scan, ServoTest, Auto, Guided, Initialising.
 
-### Blimp (`Blimp/`)
+### Blimp ([`Blimp/`](https://github.com/ArduPilot/ardupilot/tree/e96bd9053e/Blimp))
 
 Buoyant indoor airship: thrust-vectoring **fins** instead of rotors (`Fins`/`AR_Motors`), altitude = neutral buoyancy + ballonet, velocity-control modes (velocity, loiter, hold, land, rtl, auto, manual).
 
